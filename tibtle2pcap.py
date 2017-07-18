@@ -45,12 +45,29 @@ pd = pcapdump.PcapDumper(DLT_PPI, sys.argv[2])
 
 # Chunk packet content into generator
 packets=(capturedata[i:i+TIRECLEN] for i in xrange(0, len(capturedata), TIRECLEN))
+first_packet = True
+
 
 for packet in packets:
-	(pinfo, pnum, pts, plen) = struct.unpack('<cidh',packet[0:15])
+	(pinfo, pnum, pts, plen) = struct.unpack('<ciqh',packet[0:15])
 	if pinfo != "\x01": continue 	# Bit 0 format is all we can handle
 	data = packet[16:16+plen]
 	payload = data[0:-3]
+
+	rawTimestamp = pts
+	timeLo = rawTimestamp & 0xFFFF;
+	timeHi = (rawTimestamp >> 16);
+	timeStamp = timeHi*5000 + timeLo;
+	timeStampUs = timeStamp / 32;
+	ts_usec = timeStampUs % 1000000
+	ts_sec = timeStampUs / 1000000
+
+	# if first_packet:
+	# 	first_packet = False
+	# 	first_packet_pts = pts
+	# pts = (pts - first_packet_pts)/419
+	# ts_usec = pts % 1000000
+	# ts_sec = pts / 1000000
 
 	# Based on my analysis of the TI Packet Sniffer savefile, we can get these
 	# additional values too.  When the PPI format is updated to accommodate non-802.11
@@ -64,5 +81,6 @@ for packet in packets:
 	#hexdump.hexdump(payload)
 	# This hideoous string is a PPI header with DLT_USER specified so we can use
 	# the btle plugin with Wireshark.
-	pd.pcap_dump("\x00\x00\x08\x00\x93\x00\x00\x00" + payload)
+	pd.pcap_dump("\x00\x00\x08\x00\x93\x00\x00\x00" + payload, ts_sec=ts_sec, ts_usec=ts_usec)
+
 print
