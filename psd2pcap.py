@@ -20,6 +20,7 @@ import sys
 import pcapdump
 TIRECLEN=271
 DLT_PPI=192
+BTLE_PPI=30006
 
 def chan2mhz(chan):
 	chanmap = {
@@ -77,3 +78,40 @@ for packet in packets:
 	pd.pcap_dump("\x00\x00\x08\x00\x93\x00\x00\x00" + payload, ts_sec=ts_sec, ts_usec=ts_usec)
 
 print
+
+# https://github.com/greatscottgadgets/libbtbb/blob/a4e150107c2e9f79363085fb3700a5da27003e56/lib/src/pcap.c
+
+
+
+# #define PPI_BTLE 30006
+
+# typedef struct __attribute__((packed)) {
+# 	uint8_t pph_version;
+# 	uint8_t pph_flags;
+# 	uint16_t pph_len;
+# 	uint32_t pph_dlt;
+# } ppi_packet_header_t;
+
+# typedef struct __attribute__((packed)) {
+# 	uint16_t pfh_type;
+# 	uint16_t pfh_datalen;
+# } ppi_fieldheader_t;
+
+# typedef struct __attribute__((packed)) {
+# 	uint8_t btle_version;
+# 	uint16_t btle_channel;
+# 	uint8_t btle_clkn_high;
+# 	uint32_t btle_clk100ns;
+# 	int8_t rssi_max;
+# 	int8_t rssi_min;
+# 	int8_t rssi_avg;
+# 	uint8_t rssi_count;
+# } ppi_btle_t;
+
+# typedef struct __attribute__((packed)) {
+# 	pcaprec_hdr_t pcap_header;
+#   ppi_packet_header_t ppi_packet_header;
+# 	ppi_fieldheader_t ppi_fieldheader;
+# 	ppi_btle_t le_ll_ppi_header;
+# 	uint8_t le_packet[LE_MAX_PAYLOAD];
+# } pcap_ppi_le_packet;

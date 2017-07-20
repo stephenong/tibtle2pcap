@@ -24,7 +24,31 @@ python.exe -B %~dp0psd2pcap.py %*
 * Click New, enter btle in "Payload Protocol", and click ok
 * Keep clicking OK until all your preference windows are closed
 
-filters:
+filter for wireshark:
 
 * `btatt`
 * `btle.data_header.length > 0 || btle.advertising_header.pdu_type == 0x05`
+
+filter for TI Packet Sniffer:
+
+```text
+[p1_ok]
+FCS=OK
+[p2_ads_connectable]
+APT=ADV_SCAN_REQ;FCS=OK
+APT=ADV_SCAN_RSP;FCS=OK
+APT=ADV_CONNECT_REQ
+APT=ADV_IND;FCS=OK
+PTZ=L2CAP-S
+PTZ=Control
+[p3_ads_scan]
+APT=ADV_SCAN_REQ;FCS=OK
+APT=ADV_SCAN_RSP;FCS=OK
+APT=ADV_CONNECT_REQ
+PTZ=L2CAP-S
+PTZ=Control
+[p4_data_only]
+APT=ADV_CONNECT_REQ
+PTZ=L2CAP-S
+PTZ=Control
+```
